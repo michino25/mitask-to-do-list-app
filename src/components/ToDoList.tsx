@@ -30,7 +30,7 @@ const dayOfWeek = daysOfWeekArr[today.getDay()];
 
 export default function ToDoList() {
     const divStyle = {
-        backgroundImage: 'url("/src/assets/background.png")',
+        backgroundImage: 'url("/background.png")',
         backgroundSize: "cover",
     };
 
