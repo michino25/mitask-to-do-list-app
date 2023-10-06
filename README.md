@@ -1,8 +1,8 @@
 # miTask [To-Do List App]
 
-![To-Do List Logo](public/background.png)
+![miTask Demo](public/demo.png)
 
-Welcome to the To-Do List app repository! This simple yet powerful task management application helps you organize your daily tasks and stay productive.
+Welcome to the miTask repository! This simple yet powerful task management application helps you organize your daily tasks and stay productive.
 
 ## Features
 
