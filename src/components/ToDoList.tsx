@@ -76,9 +76,9 @@ export default function ToDoList() {
     };
 
     return (
-        <div className="flex justify-center items-center p-5 w-screen h-screen">
+        <div className="flex justify-center items-center p-5 w-full h-full min-h-screen">
             <div
-                className="flex justify-center items-center max-w-4xl min-h-full w-[60rem] bg-white border border-gray-200 rounded-lg shadow p-5"
+                className="flex justify-center items-center max-w-4xl min-h-[90vh] w-[60rem] bg-white border border-gray-200 rounded-lg shadow p-5"
                 style={divStyle}
             >
                 <div className="p-4 bg-white/70 backdrop-blur-md rounded-2xl w-[30rem]">
