@@ -66,7 +66,7 @@ export default function ToDoItem({
                     className={
                         !editFocus
                             ? "hidden"
-                            : "w-full h-full bg-transparent p-0 border-b-2 border-transparent border-0 focus:ring-0"
+                            : "w-full h-full bg-transparent p-0 border-b-2 border-0 border-transparent focus:border-amber-400 focus:ring-0"
                     }
                 />
                 <span className={editFocus ? "hidden" : ""}>{content}</span>
