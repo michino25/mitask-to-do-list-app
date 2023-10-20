@@ -1,20 +1,9 @@
-import ToDoItem from "./ToDoItem";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
-
-interface ToDoItem {
-    id: string;
-    content: string;
-    done: boolean;
-}
-
-const TO_DO_APP_KEY = "TO_DO_APP";
-
-const generateId = () => {
-    const millisecond = new Date().getMilliseconds();
-    const randomStr = Math.random().toString(36).substring(2, 10);
-
-    return `${millisecond}${randomStr}`;
-};
+import ToDoItem from "./TodoItem";
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { selectTodoList } from "../../redux/selectors";
+import todosSlice, { Todo, TO_DO_APP_KEY } from "./todosSlice";
+// import { v4 as uuid } from "uuid";
 
 const today = new Date();
 const daysOfWeekArr = [
@@ -28,74 +17,50 @@ const daysOfWeekArr = [
 ];
 const dayOfWeek = daysOfWeekArr[today.getDay()];
 
-export default function ToDoList() {
+export default function TodoList() {
     const divStyle = {
         backgroundImage: 'url("/background.png")',
         backgroundSize: "cover",
     };
 
+    const firstRender = useRef(true);
+
+    const dispatch = useDispatch();
+    const todos = useSelector(selectTodoList);
+
     const [input, setInput] = useState("");
-    const [toDoList, setToDoList] = useState<ToDoItem[]>([]);
 
+    // get localStorage in reducer of redux (todosSlice file)
     useEffect(() => {
-        const storedToDoList = localStorage.getItem(TO_DO_APP_KEY);
-        if (storedToDoList !== "[]" && storedToDoList !== null) {
-            setToDoList(JSON.parse(storedToDoList));
+        if (firstRender.current) firstRender.current = false;
+        else {
+            localStorage.setItem(TO_DO_APP_KEY, JSON.stringify(todos));
         }
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem(TO_DO_APP_KEY, JSON.stringify(toDoList));
-    }, [toDoList]);
+    }, [todos]);
 
     const inputHandler = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         setInput(e.target.value);
     }, []);
 
-    const addToDoList = useCallback(() => {
-        setToDoList([
-            { id: generateId(), content: input, done: false },
-            ...toDoList,
-        ]);
+    const addToDoList = () => {
         setInput("");
-    }, [toDoList, input]);
-
-    const doneItem = (id: string) => {
-        setToDoList((prevState) =>
-            prevState.map((todo) =>
-                todo.id === id ? { ...todo, done: !todo.done } : todo
-            )
+        dispatch(
+            todosSlice.actions.addTodo({
+                // uuid(),
+                id: Date.now().toString(),
+                content: input,
+                completed: false,
+                label: 1,
+            })
         );
-    };
-
-    const updateItem = (id: string, inputValue: string) => {
-        setToDoList((prevState) =>
-            prevState.map((todo) =>
-                todo.id === id ? { ...todo, content: inputValue } : todo
-            )
-        );
-    };
-
-    const deleteItem = (id: string) => {
-        setToDoList((prevState) => prevState.filter((item) => id !== item.id));
     };
 
     const sortTasks = () => {
-        const sortedList = [...toDoList].sort((a, b) => {
-            if (a.done === b.done) {
-                return 0;
-            }
-            if (a.done) {
-                return 1; // Put done tasks at the end
-            }
-            return -1;
-        });
-        setToDoList(sortedList);
+        dispatch(todosSlice.actions.sortTasks());
     };
 
     const deleteDoneTasks = () => {
-        const filteredList = toDoList.filter((task) => !task.done);
-        setToDoList(filteredList);
+        dispatch(todosSlice.actions.removeCompletedTasks());
     };
 
     return (
@@ -154,29 +119,24 @@ export default function ToDoList() {
                     </div>
 
                     <div className="mt-4 mb-4">
-                        {toDoList.map((item) => (
-                            <ToDoItem
-                                key={item.id}
-                                id={item.id}
-                                content={item.content}
-                                done={item.done}
-                                handleToggleDone={doneItem}
-                                handleUpdate={updateItem}
-                                handleDelete={deleteItem}
-                            />
+                        {todos.map((item: Todo) => (
+                            <ToDoItem key={item.id} todo={item} />
                         ))}
                     </div>
 
                     <div
                         className={
-                            toDoList.length === 0
+                            todos.length === 0
                                 ? "hidden"
                                 : "flex justify-between"
                         }
                     >
                         <span className="inline-flex items-center select-none tracking-wider px-3 py-2 text-sm font-medium text-center bg-amber-50 text-amber-600 rounded-xl border-1 border-amber-500">
-                            {toDoList.filter((item) => item.done).length}/
-                            {toDoList.length}
+                            {
+                                todos.filter((item: Todo) => item.completed)
+                                    .length
+                            }
+                            /{todos.length}
                         </span>
                         <div>
                             <button

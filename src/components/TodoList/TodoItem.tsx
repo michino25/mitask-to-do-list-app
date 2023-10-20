@@ -1,23 +1,13 @@
+import { useDispatch } from "react-redux";
 import { useEffect, useRef, useState } from "react";
+import todosSlice, { Todo } from "./todosSlice";
 
 interface Props {
-    id: string;
-    content: string;
-    done: boolean;
-    handleToggleDone: (id: string) => void;
-    handleUpdate: (id: string, inputValue: string) => void;
-    handleDelete: (id: string) => void;
+    todo: Todo;
 }
 
-export default function ToDoItem({
-    id,
-    content,
-    done,
-    handleToggleDone,
-    handleUpdate,
-    handleDelete,
-}: Props) {
-    const [inputValue, setInputValue] = useState(content);
+export default function ToDoItem({ todo }: Props) {
+    const [inputValue, setInputValue] = useState(todo.content);
     const [editFocus, setEditFocus] = useState(false);
 
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -32,29 +22,39 @@ export default function ToDoItem({
     const blurInput = () => {
         setTimeout(() => {
             if (document.activeElement !== buttonRef.current) {
-                setInputValue(content);
+                setInputValue(todo.content);
                 setEditFocus(false);
             }
         }, 0); // Use a minimal delay
     };
 
-    const handleUpdateClick = () => {
+    const dispatch = useDispatch();
+
+    const completedItem = () => {
+        dispatch(todosSlice.actions.toggleTodoStatus(todo.id));
+    };
+
+    const updateContentItem = () => {
         setEditFocus(false);
-        handleUpdate(id, inputValue);
+        dispatch(todosSlice.actions.editTodo({ ...todo, content: inputValue }));
+    };
+
+    const deleteItem = () => {
+        dispatch(todosSlice.actions.removeTodo(todo.id));
     };
 
     return (
         <div className="flex justify-between items-center min-h-[44px] group hover:bg-amber-100/40 rounded-xl pl-4 pr-2">
             <input
-                id={id}
+                id={todo.id}
                 type="checkbox"
                 disabled={editFocus}
-                checked={done}
-                onChange={() => handleToggleDone(id)}
+                checked={todo.completed}
+                onChange={completedItem}
                 className="peer w-6 h-6 text-amber-500/70 bg-gray-100/30 border-2 border-gray-400 focus:outline-none focus:ring-offset-0 focus:ring-0 rounded"
             />
             <label
-                htmlFor={id}
+                htmlFor={todo.id}
                 className="w-[335px] peer-checked:line-through peer-checked:text-gray-900/50 ml-2 p-2 text-base break-words select-none font-normal text-gray-900"
             >
                 <input
@@ -69,7 +69,9 @@ export default function ToDoItem({
                             : "w-full h-full bg-transparent p-0 border-b-2 border-0 border-transparent focus:border-amber-400 focus:ring-0"
                     }
                 />
-                <span className={editFocus ? "hidden" : ""}>{content}</span>
+                <span className={editFocus ? "hidden" : ""}>
+                    {todo.content}
+                </span>
             </label>
 
             <div
@@ -83,11 +85,11 @@ export default function ToDoItem({
                 <button
                     onClick={() => setEditFocus(true)}
                     className={
-                        done
+                        todo.completed
                             ? "p-2 text-transparent"
                             : "p-2 text-gray-700 hover:text-amber-700"
                     }
-                    disabled={done}
+                    disabled={todo.completed}
                 >
                     <svg
                         width="16"
@@ -116,7 +118,7 @@ export default function ToDoItem({
 
                 {/* Delete button */}
                 <button
-                    onClick={() => handleDelete(id)}
+                    onClick={deleteItem}
                     className="p-2 fill-gray-700 hover:fill-amber-700"
                 >
                     <svg
@@ -144,7 +146,7 @@ export default function ToDoItem({
                 {/* Confirm button */}
                 <button
                     ref={buttonRef}
-                    onClick={handleUpdateClick}
+                    onClick={updateContentItem}
                     className="p-2 text-gray-700 hover:text-amber-700"
                 >
                     <svg
