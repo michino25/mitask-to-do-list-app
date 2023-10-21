@@ -29,7 +29,7 @@ export default createSlice({
     initialState,
     reducers: {
         addTodo: (state, action: PayloadAction<Todo>) => {
-            state.push(action.payload);
+            return [action.payload, ...state];
         },
         toggleTodoStatus: (state, action: PayloadAction<string>) => {
             const currentTodo = state.find(
